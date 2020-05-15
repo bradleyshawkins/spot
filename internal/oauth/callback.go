@@ -2,14 +2,13 @@ package oauth
 
 import (
 	"context"
+	"errors"
+	"fmt"
 	"net/http"
 	"sync"
 
 	"github.com/opentracing/opentracing-go/log"
-)
-
-const (
-	RedirectURL = "http://localhost:8080/oauth/callback"
+	"golang.org/x/oauth2"
 )
 
 func (o OAuth) Callback(codeChan chan<- oauthTokenResponse) {
@@ -43,7 +42,24 @@ func (o OAuth) callbackHandler(wg *sync.WaitGroup, tokenChan chan<- oauthTokenRe
 	return func(w http.ResponseWriter, r *http.Request) {
 		defer wg.Done()
 
-		token, err := o.authenticator.Token("", r)
+		vals := r.URL.Query()
+
+		if e := vals.Get("error"); e != "" {
+			tokenChan <- oauthTokenResponse{
+				token: nil,
+				error: fmt.Errorf("error getting oauth token. Error: %v", e),
+			}
+		}
+
+		code := vals.Get("code")
+		if code == "" {
+			tokenChan <- oauthTokenResponse{
+				token: nil,
+				error: errors.New("no code was returned"),
+			}
+		}
+
+		token, err := o.conf.Exchange(r.Context(), code, oauth2.AccessTypeOffline)
 
 		tokenChan <- oauthTokenResponse{
 			token: token,

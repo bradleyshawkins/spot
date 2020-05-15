@@ -36,9 +36,9 @@ var authCmd = &cobra.Command{
 	Long:  ``,
 	Run: func(cmd *cobra.Command, args []string) {
 
-		spotifyConfigInfo := config.GetSpotifyClientInfo()
+		conf := config.GetOAuthConfig()
 
-		auth := oauth.NewOAuth(spotifyConfigInfo.ClientID, spotifyConfigInfo.Secret)
+		auth := oauth.NewOAuth(conf)
 
 		token, err := auth.Authorize()
 		if err != nil {

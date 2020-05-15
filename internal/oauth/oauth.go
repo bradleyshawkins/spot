@@ -11,7 +11,7 @@ import (
 var scopesRequested = []string{}
 
 type OAuth struct {
-	authenticator spotify.Authenticator
+	conf *oauth2.Config
 }
 
 type oauthTokenResponse struct {
@@ -19,11 +19,11 @@ type oauthTokenResponse struct {
 	error error
 }
 
-func NewOAuth(clientID, clientSecret string) OAuth {
-	a := spotify.NewAuthenticator(RedirectURL, scopesRequested...)
-	a.SetAuthInfo(clientID, clientSecret)
+func NewOAuth(conf *oauth2.Config) OAuth {
+	a := spotify.NewAuthenticator(conf.RedirectURL, scopesRequested...)
+	a.SetAuthInfo(conf.ClientID, conf.ClientSecret)
 	return OAuth{
-		authenticator: a,
+		conf: conf,
 	}
 }
 
@@ -31,7 +31,7 @@ func (o OAuth) Authorize() (*oauth2.Token, error) {
 	tokenChan := make(chan oauthTokenResponse)
 	go o.Callback(tokenChan)
 
-	url := o.authenticator.AuthURL("")
+	url := o.conf.AuthCodeURL("", oauth2.AccessTypeOffline)
 	fmt.Println("Visit this URL to authorize", url)
 
 	// Start http server for callback

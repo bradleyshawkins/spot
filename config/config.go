@@ -16,12 +16,14 @@ const (
 	spotifyAccessToken           = "SPOTIFY_ACCESS_TOKEN"
 	spotifyRefreshToken          = "SPOTIFY_REFRESH_TOKEN"
 	spotifyAccessTokenExpiration = "SPOTIFY_ACCESS_TOKEN_EXPIRATION"
+	spotifyTokenType             = "SPOTIFY_TOKEN_TYPE"
+
+	SpotifyURL = "https://api.spotify.com"
 )
 
-type SpotifyClientInfo struct {
-	ClientID string
-	Secret   string
-}
+var (
+	spotifyRedirectURL = "http://localhost:8080/oauth/callback"
+)
 
 func InitConfig(cfgFile string) func() {
 	return func() {
@@ -51,10 +53,17 @@ func InitConfig(cfgFile string) func() {
 	}
 }
 
-func GetSpotifyClientInfo() SpotifyClientInfo {
-	return SpotifyClientInfo{
-		ClientID: viper.GetString(spotifyClient),
-		Secret:   viper.GetString(spotifySecret),
+func GetOAuthConfig() *oauth2.Config {
+	return &oauth2.Config{
+		ClientID:     viper.GetString(spotifyClient),
+		ClientSecret: viper.GetString(spotifySecret),
+		Endpoint: oauth2.Endpoint{
+			AuthURL:   "https://accounts.spotify.com/authorize",
+			TokenURL:  "https://accounts.spotify.com/api/token",
+			AuthStyle: 0,
+		},
+		RedirectURL: spotifyRedirectURL,
+		Scopes:      nil,
 	}
 }
 
@@ -63,10 +72,20 @@ func SetOAuthToken(token *oauth2.Token) error {
 	viper.Set(spotifyAccessToken, token.AccessToken)
 	viper.Set(spotifyRefreshToken, token.RefreshToken)
 	viper.Set(spotifyAccessTokenExpiration, token.Expiry)
+	viper.Set(spotifyTokenType, token.TokenType)
 
 	err := viper.WriteConfig()
 	if err != nil {
 		return err
 	}
 	return nil
+}
+
+func GetOAuthToken() *oauth2.Token {
+	return &oauth2.Token{
+		AccessToken:  viper.GetString(spotifyAccessToken),
+		TokenType:    viper.GetString(spotifyTokenType),
+		RefreshToken: viper.GetString(spotifyRefreshToken),
+		Expiry:       viper.GetTime(spotifyAccessTokenExpiration),
+	}
 }
