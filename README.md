@@ -1,4 +1,4 @@
-#Overview
+# Overview
 Spot is a CLI tool used to talk to the Spotify API.
 
 # Features
