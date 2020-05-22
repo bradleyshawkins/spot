@@ -1,8 +1,15 @@
 package config
 
 import (
+	"context"
 	"fmt"
+	"net/http"
 	"os"
+	"time"
+
+	"github.com/zmb3/spotify"
+
+	"github.com/pkg/errors"
 
 	"golang.org/x/oauth2"
 
@@ -47,10 +54,29 @@ func InitConfig(cfgFile string) func() {
 		viper.AutomaticEnv() // read in environment variables that match
 
 		// If a config file is found, read it in.
-		if err := viper.ReadInConfig(); err == nil {
-			fmt.Println("Using config file:", viper.ConfigFileUsed())
+		if err := viper.ReadInConfig(); err != nil {
+			fmt.Println("Error loading config file. Error:", err)
 		}
 	}
+}
+
+func GetClient(ctx context.Context) (*http.Client, error) {
+	conf := GetOAuthConfig()
+	token := GetOAuthToken()
+
+	if token.Expiry.Before(time.Now()) {
+		t, err := conf.TokenSource(ctx, token).Token()
+		if err != nil {
+			return nil, errors.Wrap(err, "unable to refresh token")
+		}
+
+		err = SetOAuthToken(t)
+		if err != nil {
+			return nil, errors.Wrap(err, "unable to set oauth token")
+		}
+	}
+
+	return conf.Client(ctx, token), nil
 }
 
 func GetOAuthConfig() *oauth2.Config {
@@ -63,7 +89,12 @@ func GetOAuthConfig() *oauth2.Config {
 			AuthStyle: 0,
 		},
 		RedirectURL: spotifyRedirectURL,
-		Scopes:      nil,
+		Scopes: []string{
+			spotify.ScopeUserReadCurrentlyPlaying,
+			spotify.ScopeUserFollowRead,
+			spotify.ScopeUserFollowModify,
+			spotify.ScopeUserModifyPlaybackState,
+		},
 	}
 }
 

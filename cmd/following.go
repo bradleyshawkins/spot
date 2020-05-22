@@ -19,17 +19,16 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/zmb3/spotify"
-
 	"github.com/bradleyshawkins/spot/config"
+	"github.com/zmb3/spotify"
 
 	"github.com/spf13/cobra"
 )
 
-// playingCmd represents the playing command
-var playingCmd = &cobra.Command{
-	Use:   "playing",
-	Short: "Gets currently playing song",
+// followingCmd represents the following command
+var followingCmd = &cobra.Command{
+	Use:   "following",
+	Short: "Checks to see if you follow the artists of the currently playing song",
 	Long:  ``,
 	Run: func(cmd *cobra.Command, args []string) {
 		ctx := context.Background()
@@ -47,21 +46,27 @@ var playingCmd = &cobra.Command{
 			return
 		}
 
-		fmt.Println("Track:\n\t", fs.Item.Name)
-
-		if len(fs.Item.Artists) == 1 {
-			fmt.Println("Artist:\n\t", fs.Item.Artists[0].Name)
-		} else {
-			fmt.Println("Artists:")
-			for _, a := range fs.Item.Artists {
-				fmt.Println("\t", a.Name)
-			}
+		var artistIDs []spotify.ID
+		for _, artist := range fs.Item.Artists {
+			artistIDs = append(artistIDs, artist.ID)
 		}
 
-		fmt.Println("Album:\n\t", fs.Item.Album.Name)
+		follows, err := s.CurrentUserFollows("artist", artistIDs...)
+		if err != nil {
+			fmt.Println("Error checking if user follows artists. Error:", err)
+			return
+		}
+
+		for i, artist := range fs.Item.Artists {
+			if follows[i] {
+				fmt.Printf("You follow %s\n", artist.Name)
+			} else {
+				fmt.Printf("You do not follow %s\n", artist.Name)
+			}
+		}
 	},
 }
 
 func init() {
-	rootCmd.AddCommand(playingCmd)
+	rootCmd.AddCommand(followingCmd)
 }

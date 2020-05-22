@@ -23,35 +23,29 @@ import (
 	"github.com/spf13/cobra"
 )
 
+var expiration bool
+
 // tokenCmd represents the token command
 var tokenCmd = &cobra.Command{
 	Use:   "token",
-	Short: "Get info about the oauth token",
-	Long: `A longer description that spans multiple lines and likely contains examples
-and usage of using your command. For example:
-
-Cobra is a CLI library for Go that empowers applications.
-This application is a tool to generate the needed files
-to quickly create a Cobra application.`,
+	Short: "Get info about the oauth token in config file",
+	Long:  ``,
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println("token called")
 		token := config.GetOAuthToken()
 
-		fmt.Printf("%+v", token)
+		if expiration {
+			fmt.Println("Expiration:\n\t", token.Expiry)
+			return
+		}
+		fmt.Println("Access Token:\n\t", token.AccessToken)
+		fmt.Println("Refresh Token:\n\t", token.RefreshToken)
+		fmt.Println("Expiration:\n\t", token.Expiry)
+		fmt.Println("Token Type:\n\t", token.TokenType)
 	},
 }
 
 func init() {
 	rootCmd.AddCommand(tokenCmd)
 
-	// Here you will define your flags and configuration settings.
-
-	// Cobra supports Persistent Flags which will work for this command
-	// and all subcommands, e.g.:
-	// tokenCmd.PersistentFlags().String("foo", "", "A help for foo")
-
-	// Cobra supports local flags which will only run when this command
-	// is called directly, e.g.:
-	// tokenCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
-	tokenCmd.Flags().BoolP("expiration", "e", false, "Display only token expiration time")
+	tokenCmd.Flags().BoolVarP(&expiration, "expiration", "e", false, "Display only token expiration time")
 }

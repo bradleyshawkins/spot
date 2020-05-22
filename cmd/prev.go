@@ -16,38 +16,41 @@ limitations under the License.
 package cmd
 
 import (
+	"context"
 	"fmt"
-
-	"github.com/bradleyshawkins/spot/internal/oauth"
 
 	"github.com/bradleyshawkins/spot/config"
 	"github.com/spf13/cobra"
+	"github.com/zmb3/spotify"
 )
 
-// authCmd represents the auth command
-var authCmd = &cobra.Command{
-	Use:   "auth",
-	Short: "Authenticate with Spotify using OAuth2",
-	Long:  ``,
+// prevCmd represents the prev command
+var prevCmd = &cobra.Command{
+	Use:   "prev",
+	Short: "A brief description of your command",
+	Long: `A longer description that spans multiple lines and likely contains examples
+and usage of using your command. For example:
+
+Cobra is a CLI library for Go that empowers applications.
+This application is a tool to generate the needed files
+to quickly create a Cobra application.`,
 	Run: func(cmd *cobra.Command, args []string) {
-
-		conf := config.GetOAuthConfig()
-
-		auth := oauth.NewOAuth(conf)
-
-		token, err := auth.Authorize()
+		ctx := context.Background()
+		c, err := config.GetClient(ctx)
 		if err != nil {
-			fmt.Println(err)
+			fmt.Println("Error getting http client. Error:", err)
 			return
 		}
 
-		err = config.SetOAuthToken(token)
+		s := spotify.NewClient(c)
+		err = s.Previous()
 		if err != nil {
-			fmt.Println(err)
+			fmt.Println("Error skipping to next track. Error:", err)
+			return
 		}
 	},
 }
 
 func init() {
-	rootCmd.AddCommand(authCmd)
+	rootCmd.AddCommand(prevCmd)
 }

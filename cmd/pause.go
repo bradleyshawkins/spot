@@ -16,38 +16,37 @@ limitations under the License.
 package cmd
 
 import (
+	"context"
 	"fmt"
 
-	"github.com/bradleyshawkins/spot/internal/oauth"
-
 	"github.com/bradleyshawkins/spot/config"
+	"github.com/zmb3/spotify"
+
 	"github.com/spf13/cobra"
 )
 
-// authCmd represents the auth command
-var authCmd = &cobra.Command{
-	Use:   "auth",
-	Short: "Authenticate with Spotify using OAuth2",
+// pauseCmd represents the pause command
+var pauseCmd = &cobra.Command{
+	Use:   "pause",
+	Short: "Pauses the currently playing song",
 	Long:  ``,
 	Run: func(cmd *cobra.Command, args []string) {
-
-		conf := config.GetOAuthConfig()
-
-		auth := oauth.NewOAuth(conf)
-
-		token, err := auth.Authorize()
+		ctx := context.Background()
+		c, err := config.GetClient(ctx)
 		if err != nil {
-			fmt.Println(err)
+			fmt.Println("Error getting http client. Error:", err)
 			return
 		}
 
-		err = config.SetOAuthToken(token)
+		s := spotify.NewClient(c)
+		err = s.Pause()
 		if err != nil {
-			fmt.Println(err)
+			fmt.Println("Error pausing track. Error:", err)
+			return
 		}
 	},
 }
 
 func init() {
-	rootCmd.AddCommand(authCmd)
+	rootCmd.AddCommand(pauseCmd)
 }

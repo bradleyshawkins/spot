@@ -19,18 +19,22 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/zmb3/spotify"
-
 	"github.com/bradleyshawkins/spot/config"
+	"github.com/zmb3/spotify"
 
 	"github.com/spf13/cobra"
 )
 
-// playingCmd represents the playing command
-var playingCmd = &cobra.Command{
-	Use:   "playing",
-	Short: "Gets currently playing song",
-	Long:  ``,
+// unfollowCmd represents the unfollow command
+var unfollowCmd = &cobra.Command{
+	Use:   "unfollow",
+	Short: "A brief description of your command",
+	Long: `A longer description that spans multiple lines and likely contains examples
+and usage of using your command. For example:
+
+Cobra is a CLI library for Go that empowers applications.
+This application is a tool to generate the needed files
+to quickly create a Cobra application.`,
 	Run: func(cmd *cobra.Command, args []string) {
 		ctx := context.Background()
 
@@ -47,21 +51,18 @@ var playingCmd = &cobra.Command{
 			return
 		}
 
-		fmt.Println("Track:\n\t", fs.Item.Name)
-
-		if len(fs.Item.Artists) == 1 {
-			fmt.Println("Artist:\n\t", fs.Item.Artists[0].Name)
-		} else {
-			fmt.Println("Artists:")
-			for _, a := range fs.Item.Artists {
-				fmt.Println("\t", a.Name)
-			}
+		var artistIDs []spotify.ID
+		for _, artist := range fs.Item.Artists {
+			artistIDs = append(artistIDs, artist.ID)
 		}
 
-		fmt.Println("Album:\n\t", fs.Item.Album.Name)
+		err = s.UnfollowArtist(artistIDs...)
+		if err != nil {
+			fmt.Println("Unable to follow artist/s. Error:", err)
+		}
 	},
 }
 
 func init() {
-	rootCmd.AddCommand(playingCmd)
+	rootCmd.AddCommand(unfollowCmd)
 }
