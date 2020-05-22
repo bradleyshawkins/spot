@@ -28,7 +28,7 @@ import (
 // playCmd represents the play command
 var playCmd = &cobra.Command{
 	Use:   "play",
-	Short: "plays a paused song",
+	Short: "Plays a paused track",
 	Long:  ``,
 	Run: func(cmd *cobra.Command, args []string) {
 		ctx := context.Background()

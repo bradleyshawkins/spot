@@ -28,7 +28,9 @@ import (
 var authCmd = &cobra.Command{
 	Use:   "auth",
 	Short: "Authenticate with Spotify using OAuth2",
-	Long:  ``,
+	Long: `Auth will return a URL to visit to authorize this app to
+use the Spotify API. Visit the URL, click Agree and close the window.
+The OAuth token will be stored in the specified config file. Default ~/.spot/config.yaml`,
 	Run: func(cmd *cobra.Command, args []string) {
 
 		conf := config.GetOAuthConfig()

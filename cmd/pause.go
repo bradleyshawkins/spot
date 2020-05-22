@@ -28,7 +28,7 @@ import (
 // pauseCmd represents the pause command
 var pauseCmd = &cobra.Command{
 	Use:   "pause",
-	Short: "Pauses the currently playing song",
+	Short: "Pauses the currently playing track",
 	Long:  ``,
 	Run: func(cmd *cobra.Command, args []string) {
 		ctx := context.Background()

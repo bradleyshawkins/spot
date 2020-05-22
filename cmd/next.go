@@ -27,7 +27,7 @@ import (
 // nextCmd represents the next command
 var nextCmd = &cobra.Command{
 	Use:   "next",
-	Short: "Skips to the next song",
+	Short: "Skips to the next track",
 	Long:  ``,
 	Run: func(cmd *cobra.Command, args []string) {
 		ctx := context.Background()

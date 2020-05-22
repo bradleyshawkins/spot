@@ -29,7 +29,7 @@ import (
 // playingCmd represents the playing command
 var playingCmd = &cobra.Command{
 	Use:   "playing",
-	Short: "Gets currently playing song",
+	Short: "Gets currently playing track",
 	Long:  ``,
 	Run: func(cmd *cobra.Command, args []string) {
 		ctx := context.Background()
