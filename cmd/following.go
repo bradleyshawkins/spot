@@ -18,6 +18,7 @@ package cmd
 import (
 	"context"
 	"fmt"
+	"strconv"
 
 	"github.com/bradleyshawkins/spot/config"
 	"github.com/zmb3/spotify"
@@ -57,11 +58,14 @@ var followingCmd = &cobra.Command{
 			return
 		}
 
+		// follows comes back in the order of the artistIDs sent in.
 		for i, artist := range fs.Item.Artists {
 			if follows[i] {
-				fmt.Printf("You follow %s\n", artist.Name)
+				check, _ := strconv.ParseInt(`2705`, 16, 32)
+				fmt.Printf("%c  Following %s\n", rune(check), artist.Name)
 			} else {
-				fmt.Printf("You do not follow %s\n", artist.Name)
+				x, _ := strconv.ParseInt(`274C`, 16, 32)
+				fmt.Printf("%c  Not following %s\n", rune(x), artist.Name)
 			}
 		}
 	},
